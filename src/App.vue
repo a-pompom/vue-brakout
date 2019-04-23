@@ -12,6 +12,12 @@
 				v-bind:paddle="paddle"
 			>
 			</app-paddle>
+			<app-collision-ball-and-paddle
+				v-bind:object1="paddle"
+				v-bind:object2="ball"
+				v-bind:runFlg= "gameRunFlg"
+				
+			></app-collision-ball-and-paddle>
 		</svg>
     </div>
     <input type="range" v-model="paddle.x" min="10" max="400" value="200" class="paddle--slider">
@@ -23,6 +29,8 @@
 <script>
 import Ball from './components/Ball.vue';
 import Paddle from './components/Paddle.vue';
+import CollisionDetector from './components/CollisionDetector.vue';
+	
 export default {
 	data: function() {
 		return {
@@ -50,7 +58,6 @@ export default {
 	watch: {
 		'paddle.x'() {
 			let unwatch = this.$watch('paddle.x', function(){ return; });
-			console.log(unwatch);
 			if (this.gameRunFlg) {
 				unwatch();
 			}
@@ -66,7 +73,8 @@ export default {
 	
 	components: {
     appBall: Ball,
-	appPaddle: Paddle
+	appPaddle: Paddle,
+	appCollisionBallAndPaddle: CollisionDetector
  	},
 	
 	methods: {
@@ -77,7 +85,7 @@ export default {
 			}
 			vm.gameRunFlg = true;
 			(function loop(){
-				vm.ball.y += vm.ball.speedY;
+				vm.ball.y -= vm.ball.speedY;
 				requestAnimationFrame(loop);
 			}());
 		},

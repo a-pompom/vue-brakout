@@ -13,7 +13,7 @@
 		watch: {
 			'ball.x': function() {
 				let ballX = parseInt(this.ball.x);
-				if (ballX > 400) {
+				if (ballX > 500) {
 					this.$emit('screen-collisioned');
 				}
 				if (ballX < 10) {
@@ -22,7 +22,7 @@
 			},
 			'ball.y': function() {
 				let y = parseInt(this.ball.y);
-				if (y > 400) {
+				if (y > 500) {
 					this.$emit('screen-collisioned');
 				}
 				if (y < 10) {
