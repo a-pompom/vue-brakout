@@ -7,7 +7,9 @@
 
 <script>
 	export default {
-		props: ['paddle']
+		props: {
+			paddle: Object
+		}
 	}
 </script>
 
