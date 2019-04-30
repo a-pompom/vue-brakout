@@ -4,12 +4,12 @@
 	<svg id="app--screen" >
 		
 		
-		<app-brick
+		<app-bricks
 			v-bind:ball="ball"
-			v-bind:brick="brick"
+			v-bind:bricks="bricks"
 			v-bind:runFlg="gameRunFlg"
 			v-on:collisioned="collisionedBallAndBrick"
-		></app-brick>
+		></app-bricks>
 		
 	
 		<!-- ボール
@@ -61,7 +61,7 @@
 
 <script>
 	//モジュールインポート
-	import Brick from './components/Brick.vue';
+	import Bricks from './components/Bricks.vue';
 	import Ball from './components/Ball.vue';
 	import Paddle from './components/Paddle.vue';
 	import CollisionDetector from './components/CollisionDetector.vue';
@@ -90,6 +90,8 @@
 						this.height = screenHeight;
 					}
 				},
+				
+				bricks: [],
 				
 				brick: {
 					visible: true,
@@ -163,7 +165,7 @@
 
 		//コンポーネント群
 		components: {
-		appBrick: Brick,
+		appBricks: Bricks,
 		appBall: Ball,
 		appPaddle: Paddle,
 		appCollisionBallAndPaddle: CollisionDetector,
@@ -182,6 +184,7 @@
 					return;
 				}
 				vm.gameRunFlg = true;
+				this.createBricks();
 				(function loop(){
 					vm.ball.y -= vm.ball.speedY;
 					vm.ball.x -= vm.ball.speedX;
@@ -194,6 +197,30 @@
 				this.ball.speedY = -this.ball.speedY;
 			},
 			
+			createBricks: function() {
+				let id = 0;
+				for (let col = 0; col < 3; col++) {
+					for (let row = 0; row < 3; row++) {
+						let brick= {
+									id: id,
+									visible: true,
+									x: 300 + col * 110,
+									y: 200 + row * 20,
+									cx: 0,
+									cy: 0,
+									width: 100,
+									height: 15,
+									setCenter: function() {
+										this.cx = parseInt(this.x) + (this.width / 2);
+										this.cy = parseInt(this.y) + (this.height / 2);
+									}
+						};
+						this.bricks.push(brick);
+						id ++;
+					}
+				}
+				console.log(this.bricks);
+			},
 			/**
 			 * ボールと画面の衝突時処理 ボールを反射させる
 			 * @param String collisionDirection -衝突方向 X方向かY方向かのみを区別
@@ -224,9 +251,9 @@
 				this.ball.speedY = -this.ball.speedY;
 			},
 			
-			collisionedBallAndBrick: function() {
+			collisionedBallAndBrick: function(index) {
 				this.ball.speedY = -this.ball.speedY;
-				this.brick.visible = false;
+				this.bricks[index].visible = false;
 			}
 		}
 	}
