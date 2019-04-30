@@ -1,7 +1,7 @@
 <template>
 	<svg>
-		<svg v-show="brick.visible">
-			<rect x="300" y="200" width="100" height="15" class="brick"></rect>
+		<svg v-if="brick.visible">
+			<rect v-bind:x="brick.x" v-bind:y="brick.y" width="100" height="15" class="brick"></rect>
 		</svg>
 		<app-collision-ball-and-brick
 				v-bind:object1="ball"

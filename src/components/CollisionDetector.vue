@@ -41,7 +41,7 @@
 				//let collisionDirection = (this.object.cy - this.object2.cy) < 0 ? 'UP' : 'DOWN';
 				let isXCollisioned = distanceX < collisionBorderX;
 				let isYCollisioned = distanceY < collisionBorderY;
-				console.log(this.object2.cx);
+				
 				
 				if (isXCollisioned && isYCollisioned) {
 					console.log('collision');
