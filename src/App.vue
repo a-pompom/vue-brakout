@@ -4,6 +4,13 @@
 	<svg id="app--screen" >
 		
 		
+		<app-brick
+			v-bind:ball="ball"
+			v-bind:brick="brick"
+			v-bind:runFlg="gameRunFlg"
+			v-on:collisioned="collisionedBallAndBrick"
+		></app-brick>
+		
 	
 		<!-- ボール
 			props -[ボールオブジェクト] 
@@ -54,6 +61,7 @@
 
 <script>
 	//モジュールインポート
+	import Brick from './components/Brick.vue';
 	import Ball from './components/Ball.vue';
 	import Paddle from './components/Paddle.vue';
 	import CollisionDetector from './components/CollisionDetector.vue';
@@ -83,6 +91,20 @@
 					}
 				},
 				
+				brick: {
+					visible: true,
+					x: 300,
+					y: 200,
+					cx: 0,
+					cy: 0,
+					width: 100,
+					height: 15,
+					setCenter: function() {
+						this.cx = parseInt(this.x) + (this.width / 2);
+						this.cy = parseInt(this.y) + (this.height / 2);
+					}
+				},
+				
 				ball: {
 					x: 500,
 					y: 580,
@@ -101,6 +123,7 @@
 
 				
 				paddle: {
+					visible: true,
 					x: 450,
 					y: 600,
 					cx: 0,
@@ -140,6 +163,7 @@
 
 		//コンポーネント群
 		components: {
+		appBrick: Brick,
 		appBall: Ball,
 		appPaddle: Paddle,
 		appCollisionBallAndPaddle: CollisionDetector,
@@ -198,6 +222,11 @@
 					this.ball.speedX = this.ballSpeedX;
 				}
 				this.ball.speedY = -this.ball.speedY;
+			},
+			
+			collisionedBallAndBrick: function() {
+				this.ball.speedY = -this.ball.speedY;
+				this.brick.visible = false;
 			}
 		}
 	}

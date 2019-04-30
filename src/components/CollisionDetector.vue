@@ -27,6 +27,9 @@
 				if (!this.runFlg) {
 					return;
 				}
+				if (!this.object2.visible) {
+					return;
+				}
 				
 				this.object1.setCenter();
 				this.object2.setCenter();
@@ -38,7 +41,7 @@
 				//let collisionDirection = (this.object.cy - this.object2.cy) < 0 ? 'UP' : 'DOWN';
 				let isXCollisioned = distanceX < collisionBorderX;
 				let isYCollisioned = distanceY < collisionBorderY;
-				//console.log(this.object2.cx);
+				console.log(this.object2.cx);
 				
 				if (isXCollisioned && isYCollisioned) {
 					console.log('collision');

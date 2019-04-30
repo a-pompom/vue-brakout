@@ -18,7 +18,6 @@
 			 * @returns String 当該オブジェクトのX、Y座標を文字列形式でまとめたもの
 			 */
 			obj1XY: function() {
-				console.log(`${this.object1.x}|${this.object1.y}`);
 				return `${this.object1.x}|${this.object1.y}`;
 			}
 		},
@@ -52,7 +51,7 @@
 				}
 				
 				if (isYCollisioned) {
-					this.$emit('collisioned', 'Y')
+					this.$emit('collisioned', 'Y');
 				}
 				
 			}
