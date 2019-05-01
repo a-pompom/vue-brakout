@@ -1,8 +1,17 @@
 <template>
 	<svg>
-		<svg v-if="brick.visible">
-			<rect v-bind:x="brick.x" v-bind:y="brick.y" width="100" height="15" class="brick"></rect>
+		<!-- ブロック
+			visibleがfalseのときは描画しない
+		-->
+		<svg v-show="brick.visible">
+			<rect v-bind:x="brick.x" v-bind:y="brick.y" 
+				v-bind:width="brick.width" v-bind:height="brick.height" class="brick"></rect>
 		</svg>
+		
+		<!-- ボールとブロックの衝突判定
+			event -[衝突判定]
+			props -[ボール、ブロック、ゲーム開始フラグ]
+		-->
 		<app-collision-ball-and-brick
 				v-bind:object1="ball"
 				v-bind:object2="brick"
@@ -23,12 +32,17 @@
 		},
 		
 		components: {
+			//衝突判定
 			AppCollisionBallAndBrick: CollisionDetector
 		},
 		
 		methods: {
-			collisionedBallAndBrick: function() {
-				this.$emit('collisioned');
+			/**
+			 * ボールとブロックの衝突時処理
+			 * 衝突したブロックのIDを渡すことで衝突対象を識別
+			 */
+			collisionedBallAndBrick: function(collisionDirection) {
+				this.$emit('collisioned', this.brick.id, collisionDirection);
 			}
 		}
 	}

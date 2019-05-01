@@ -1,5 +1,10 @@
 <template>
 	<svg>
+		<!-- ブロック
+			個々のブロックを実際に描画し、衝突判定をセットする
+			event -[衝突判定]
+			props -[ボール、ゲーム開始フラグ、各ブロック] 
+		-->
 		<app-brick
 			v-bind:ball="ball"
 			v-bind:runFlg="runFlg"
@@ -7,9 +12,8 @@
 			v-bind:key="brick.id"
 			v-bind:brick="brick"
 			
-			v-on:collisioned="collisioned(brick.id)"
-		>
-			
+			v-on:collisioned="collisioned"
+		>		
 		</app-brick>
 	</svg>
 </template>
@@ -27,8 +31,13 @@
 		},
 		
 		methods: {
-			collisioned: function(index) {
-				this.$emit('collisioned', index);
+			/**
+			 * 衝突時の処理
+			 * @param Number index ボールと衝突したブロックのインデックス
+			 * @param Object collisionDirection 衝突方向を管理するオブジェクト
+			 */
+			collisioned: function(index, collisionDirection) {
+				this.$emit('collisioned', index, collisionDirection);
 			}
 		}
 	};
