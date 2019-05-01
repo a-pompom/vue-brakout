@@ -1,6 +1,6 @@
 <template>
 	<svg>
-		<circle v-bind:cx="ball.x" v-bind:cy="ball.y" r="20"></circle>
+		<circle v-show="ball.visible" v-bind:cx="ball.x" v-bind:cy="ball.y" v-bind:r="ball.radius"></circle>
 	</svg>
 		
 	

@@ -1,6 +1,8 @@
 <template>
 	<svg>
-		<rect v-bind:x="paddle.x" v-bind:y="paddle.y" width="100" height="15" class="paddle"></rect>
+		<rect v-bind:x="paddle.x" v-bind:y="paddle.y" 
+				v-bind:width="paddle.width" v-bind:height="paddle.height" class="paddle">
+		</rect>
 	</svg>
 </template>
 
