@@ -1,29 +1,10 @@
-# breakout
+# vueでブロック崩し
 
-## Project setup
-```
-npm install
-```
+vue.jsの練習がてらブロック崩しを作りました。
+仕組み自体はシンプルなものでしたが、当たり判定を自作したり、
+物体をアニメーションさせたり、とミニゲームを作る上での基本的な
+部分に触れられたかと思います。
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+<img src="./public/breakout_image.png">
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+<img src="./public/breakout_gameover.png">
