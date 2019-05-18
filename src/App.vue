@@ -89,6 +89,8 @@
 				//ブロックの数
 				colBrick: 9,
 				rowBrick: 10,
+				//トータルのブロック数
+				brickCount: 0,
 				//スライダー幅の最大値
 				sliderMax: 0,
 				
@@ -188,13 +190,15 @@
 			},
 			
 			gameEndFlg() {
+				if(!this.gameEndFlg) {
+					return;
+				}
 				let isFailed = false;
 				this.bricks.forEach((element) => {
 					if(element.visible) {
 						isFailed = true;
 					}
 				});
-				
 				this.message.message = isFailed ? "Game Over..." : "Congratulation!!!!";
 			}
 		},
@@ -233,7 +237,10 @@
 				this.message.setParam(screen);
 				
 				//スライダーの最大値を画面幅-パドルの大きさとすることでパドルが常に画面内に収まるようになる
-				this.sliderMax = screen.width - this.paddle.width;
+				this.sliderMax = screen.width - this.paddle.width;			
+				this.message.message = "";
+				
+				this.brickCount = this.colBrick * this.rowBrick;
 			},
 			
 			/**
@@ -258,7 +265,7 @@
 					return;
 				}
 				//ランダム性を持たせるため、開始時のX方向の速度はランダムに決定
-				this.ball.speedX = Math.ceil(Math.random() * 10);
+				//this.ball.speedX = Math.ceil(Math.random() * 10);
 				
 				this.gameRunFlg = true;
 				let vm = this;
@@ -282,6 +289,19 @@
 				
 				this.ball.visible = true;
 				this.gameEndFlg = false;
+			},
+			
+			/**
+			 * ゲームオーバー処理
+			 */
+			gameOver() {
+				//ループを停止
+				window.cancelAnimationFrame(this.gameReq);
+				this.gameRunFlg = false;
+				this.gameEndFlg = true;
+				
+				//画面に留まっていると不自然なので落下後にはボールを非表示とする
+				this.ball.visible = false;
 			},
 			
 			/**
@@ -364,12 +384,7 @@
 						
 					//ゲームオーバー処理	
 					case '-Y':
-						//ループを停止
-						window.cancelAnimationFrame(this.gameReq);
-						this.gameRunFlg = false;
-						this.gameEndFlg = true;
-						//画面に留まっていると不自然なので落下後にはボールを非表示とする
-						this.ball.visible = false;
+						this.gameOver();
 						break;
 					default:
 						break;
@@ -405,6 +420,13 @@
 				
 				//衝突したブロックは非表示に切り替える
 				this.bricks[index].visible = false;
+				this.brickCount -= 1;
+				//ゲームの終了判定
+				let gameEnded = this.brickCount === 0 ? true : false;
+				
+				if (gameEnded) {
+					this.gameOver();
+				}
 			}
 		}
 	}
