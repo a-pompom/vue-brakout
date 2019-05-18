@@ -27,7 +27,7 @@
 		* @returns String 当該オブジェクトのX、Y座標を文字列形式でまとめたもの
 		*/
 		computed: {
-			obj1XY: function() {
+			obj1XY() {
 				return `${this.object1.x}|${this.object1.y}`;
 			}
 		},
@@ -38,7 +38,7 @@
 			/**
 			 * 物体間で衝突が発生したかチェック
 			 */
-			obj1XY: function() {
+			obj1XY() {
 				//ボールが動いていないときはチェックの必要がないのでスキップ
 				if (!this.runFlg) {
 					return;
@@ -67,19 +67,22 @@
 				let isYCollisioned = distanceY <= collisionBorderY;
 				
 				if (isXCollisioned && isYCollisioned) {
-					//二物体の中心座標の位置関係、及び衝突時に接していた辺から衝突方向を導出
+					//二物体の中心座標の位置関係、及び衝突時に接近していた辺から衝突方向を導出
 					//例えば、物体1が物体2に上から衝突した場合、以下の条件を満たす
 					// ・物体1のY座標 < 物体2のY座標
-					// ・二物体が縦方向で接している
+					// ・二物体が縦方向で十分に接近している
+					//
+					//※速度が整数値で飛び飛びとなっており、厳密に接することは起こりえないので、
+					//今回は十分に接近した場合、対象の方向成分で衝突したと判定した
 					let collisionDirection = {
 						top: this.object1.cy < this.object2.cy && 
-								distanceY === collisionBorderY ? true : false,
+								distanceY <= collisionBorderY ? true : false,
 						bottom: this.object1.cy > this.object2.cy && 
-								distanceY === collisionBorderY ? true : false,
+								distanceY <= collisionBorderY ? true : false,
 						left: this.object1.cx < this.object2.cx &&
-								distanceX === collisionBorderX ? true : false,
+								distanceX <= collisionBorderX ? true : false,
 						right: this.object1.cx > this.object2.cx &&
-								distanceX === collisionBorderX ? true : false,
+								distanceX <= collisionBorderX ? true : false,
 					};
 					this.$emit('collisioned', collisionDirection);
 				}

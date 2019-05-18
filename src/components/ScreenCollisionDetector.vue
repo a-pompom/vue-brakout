@@ -28,14 +28,14 @@
 			 * 監視対象となるオブジェクトのX座標、Y座標を文字列で連結する
 			 * @returns String 当該オブジェクトのX、Y座標を文字列形式でまとめたもの
 			 */
-			obj1XY: function() {
+			obj1XY() {
 				return `${this.object1.x}|${this.object1.y}`;
 			}
 		},
 		//computedの処理により、obj1XYはX座標、Y座標が格納されるので、
 		//いずかが変化すればwatchに登録された処理が発火されることとなる
 		watch: {
-			obj1XY: function() {
+			obj1XY() {
 				if (!this.runFlg) {
 					return;
 				}

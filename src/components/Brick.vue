@@ -41,7 +41,7 @@
 			 * ボールとブロックの衝突時処理
 			 * 衝突したブロックのIDを渡すことで衝突対象を識別
 			 */
-			collisionedBallAndBrick: function(collisionDirection) {
+			collisionedBallAndBrick(collisionDirection) {
 				this.$emit('collisioned', this.brick.id, collisionDirection);
 			}
 		}

@@ -30,6 +30,8 @@
 		>
 		</app-paddle>
 		
+		<text v-bind:x="message.x" v-bind:y="message.y" class="message">{{ message.message }}</text>
+		
 		<!-- ボールとパドルの衝突判定処理 
 			event -[衝突判定]
 			props -[ボール、パドル、ゲーム開始フラグ] 
@@ -53,13 +55,16 @@
 		></app-collision-ball-and-screen>
 
 	</svg>
+  	
    		
 	<!-- 操作盤 -->
-    <input type="range" v-model="paddle.x" min="10" max="800" 
+    <input type="range" v-model="paddle.x" min="0" v-bind:max="sliderMax" 
     		class="paddle--slider">
     <!-- 制御ボタン -->
     <button type="button" v-show="!gameRunFlg && !gameEndFlg" v-on:click="start"
     		class="button--start">Start</button>
+    <button type="button" v-show="gameRunFlg && !gameEndFlg" v-on:click="speedUp"
+    		class="button--start" style="margin-left: auto;">SPEED UP!!</button>
     <button type="button" v-show="gameEndFlg" v-on:click="restart"
     		class="button--retry">Restart</button>
   </div>
@@ -74,15 +79,29 @@
 	import ScreenCollisionDetector from './components/ScreenCollisionDetector.vue';
 
 	export default {
-		data: function() {
+		data() {
 			return {
 				//ゲーム用変数
 				gameRunFlg: false,
 				gameEndFlg: false,
 				gameReq: null,
-				ballSpeedX: 6,
-				colBrick: 7,
+				
+				//ブロックの数
+				colBrick: 9,
 				rowBrick: 10,
+				//スライダー幅の最大値
+				sliderMax: 0,
+				
+				//ゲーム画面に表示するメッセージ
+				message: {
+					message: "",
+					x: 0,
+					y: 0,
+					setParam(htmlScreen) {
+						this.x = htmlScreen.width * 0.5;
+						this.y = htmlScreen.height * 0.6;
+					}
+				},
 				
 				//画面のオブジェクト
 				//各オブジェクトは衝突判定を行うため、[中心のX座標, 中心のY座標, 幅, 高さ]のデータ、
@@ -94,27 +113,24 @@
 					height: 0,
 					//スクリーンの幅、高さは画面が読み込まれてからスタイルによって決定されるので、
 					//マウント後に動的にセット
-					setScreenParam: function() {
-						//HTML要素
-						let screen = document.getElementById('app--screen');
-						let screenWidth = screen.clientWidth;
-						let screenHeight = screen.clientHeight;
-						
+					setParam(htmlScreen) {
 						//中心
-						this.cx = Math.floor(screenWidth / 2);
-						this.cy = Math.floor(screenHeight / 2);
+						this.cx = Math.floor(htmlScreen.width / 2);
+						this.cy = Math.floor(htmlScreen.height / 2);
 						//大きさ
-						this.width = screenWidth;
-						this.height = screenHeight;
+						this.width = htmlScreen.width;
+						this.height = htmlScreen.height;
 					}
 				},
 				
+				//ブロックのリスト
 				bricks: [],
 				
+				//ボール
 				ball: {
 					visible: true,
-					x: 500,
-					y: 580,
+					x: 0,
+					y: 0,
 					cx: 0,
 					cy: 0,
 					radius: 20,
@@ -125,21 +141,31 @@
 					setCenter: function() {
 						this.cx = this.x;
 						this.cy = this.y;
-					}  
+					},
+					setParam(htmlScreen) {
+					    this.x = htmlScreen.width / 2;
+						this.y = htmlScreen.height * 0.9;
+					}
 				},
 
+				//パドル
 				paddle: {
 					visible: true,
-					x: 450,
-					y: 600,
+					x: 0,
+					y: 0,
 					cx: 0,
 					cy: 0,
 					width: 100,
 					height: 15,
 					speedX: 3,
-					setCenter: function() {
+					setCenter() {
 						this.cx = parseInt(this.x) + (this.width / 2);
 						this.cy = parseInt(this.y) + (this.height / 2);
+					},
+					setParam(htmlScreen, ballSize) {
+						this.width = (htmlScreen.width) * 0.2;
+						this.x = (htmlScreen.width / 2);
+						this.y = (htmlScreen.height * 0.9) + ballSize;
 					}
 				}	
 			};
@@ -156,15 +182,26 @@
 				}
 				if (!this.gameRunFlg) {
 					let PaddleX = parseInt(this.paddle.x);
-					this.ball.x = PaddleX + 50;
+					this.ball.x = PaddleX  + (this.paddle.width / 2);
 
 				}
+			},
+			
+			gameEndFlg() {
+				let isFailed = false;
+				this.bricks.forEach((element) => {
+					if(element.visible) {
+						isFailed = true;
+					}
+				});
+				
+				this.message.message = isFailed ? "Game Over..." : "Congratulation!!!!";
 			}
 		},
 		
 		//スタイルが読み込まれ、スクリーンのサイズが決定されてからスクリーンのプロパティをセット
-		mounted: function() {
-			this.screen.setScreenParam();
+		mounted() {
+			this.init();
 			this.createBricks();
 		},
 
@@ -180,48 +217,106 @@
 
 		//処理
 		methods: {
+			
+			/**
+			 * 初期化処理
+			 * 画面サイズに応じて画面上のオブジェクトの位置・大きさを動的に決定
+			 */
+			init() {
+				//HTML要素
+				let screen = this.getDOMScreen();
+				
+				//決定された画面サイズに応じて画面オブジェクトの位置を初期化
+				this.ball.setParam(screen);
+				this.paddle.setParam(screen, this.ball.radius);
+				this.screen.setParam(screen);
+				this.message.setParam(screen);
+				
+				//スライダーの最大値を画面幅-パドルの大きさとすることでパドルが常に画面内に収まるようになる
+				this.sliderMax = screen.width - this.paddle.width;
+			},
+			
+			/**
+			 * 画面サイズに関するオブジェクトを取得する
+			 */
+			getDOMScreen() {
+				let screen = {};
+				let screenDOM = document.getElementById('app--screen');
+				screen.width = screenDOM.clientWidth;
+				screen.height = screenDOM.clientHeight;
+				
+				return screen;
+			},
+			
 			/**
 			 * 開始ボタンクリック時処理
 			 * ループ関数でボールを動かすことで開始とする
 			 */
-			start: function() {
-				let vm = this;
-				if (vm.gameRunFlg) {
+			start() {
+				//ゲームが開始するまではループを実行しない
+				if (this.gameRunFlg) {
 					return;
 				}
-				vm.gameRunFlg = true;
+				//ランダム性を持たせるため、開始時のX方向の速度はランダムに決定
+				this.ball.speedX = Math.ceil(Math.random() * 10);
+				
+				this.gameRunFlg = true;
+				let vm = this;
+				
+				//再帰呼び出しを実現するため名前付き関数を利用
 				(function loop(){
 					vm.ball.y -= vm.ball.speedY;
 					vm.ball.x -= vm.ball.speedX;
 					vm.gameReq = requestAnimationFrame(loop);
 				}());
+				
 			},
 			/**
 			 * 再開始ボタンクリック時処理
 			 * 画面の状態を初期状態に戻す
 			 */
-			restart: function() {
-				//画面の状態をリセット				
+			restart() {
+				//画面の状態をリセット
+				this.init();
 				this.createBricks();
 				
 				this.ball.visible = true;
-				this.ball.x = 500;
-				this.ball.y = 580;
-				this.paddle.x = 450;
-				this.paddle.y = 600;
-				
 				this.gameEndFlg = false;
+			},
+			
+			/**
+			 * ボールのスピードを上昇させる
+			 */
+			speedUp() {
+				this.ball.speedX += 2;
+				this.ball.speedY += 2;
 			},
 			
 			/**
 			 * ブロックを描画
 			 * dataのbricksプロパティでコンポーネントと紐づけることで衝突判定が有効となる
 			 */
-			createBricks: function() {
+			createBricks() {
 				//再描画時に呼び出されたときを考慮してブロックのリストを初期化
 				this.bricks = [];
+				//HTML要素
+				let screen = this.getDOMScreen();
 				//vueのループで描画するので要素識別用にIDを付与
 				let id = 0;
+				
+				//画面サイズに応じてブロックの位置・大きさの情報
+				let brickProp = {
+					//描画開始位置
+					startX: screen.width * 0.01,
+					startY: screen.height * 0.06,
+					//大きさ
+					width: screen.width * 0.1,
+					height: screen.height * 0.03,
+					//間隔
+					spaceX: screen.width * 0.01,
+					spaceY: 4
+				};
+				
 				//列
 				for (let col = 0; col < this.colBrick; col++) {
 					//行
@@ -230,12 +325,15 @@
 						let brick= {
 									id: id,
 									visible: true,
-									x: 80 + col * 110,
-									y: 100 + row * 20,
+									//位置
+									x: brickProp.startX + col * (brickProp.width + brickProp.spaceX),
+									y: brickProp.startY + row * (brickProp.height + brickProp.spaceY),
 									cx: 0,
 									cy: 0,
-									width: 100,
-									height: 15,
+									//大きさ
+									width: brickProp.width,
+									height: brickProp.height,
+									//中央座標
 									setCenter: function() {
 										this.cx = parseInt(this.x) + (this.width / 2);
 										this.cy = parseInt(this.y) + (this.height / 2);
@@ -254,7 +352,7 @@
 			 * 下: ゲームオーバー
 			 * @param String collisionDirection -衝突方向 X、Y、-Yいずれかの値を持つ
 			 */
-			collisionedBallAndScreen: function(collisionDirection) {
+			collisionedBallAndScreen(collisionDirection) {
 				switch(collisionDirection) {
 					//反射処理
 					case 'X':
@@ -279,25 +377,18 @@
 			},
 			/**
 			 * ボールとパドルの衝突時処理
-			 * パドル上部との衝突時のみ反射し、更に、パドルの中心との距離で速度を変化させる
+			 * ボールを反射させ、かつ、衝突方向の成分で速度を変化させる
 			 * @param Object collisionDirection 衝突方向を管理するオブジェクト
 			 */
-			collisionedBallAndPaddle: function(collisionDirection) {
-				if (collisionDirection.left || 
-					collisionDirection.right || 
-					collisionDirection.bottom) {
-					return;
-				}
-				//上方向の衝突時のみ反射処理
-				if (this.ball.cx > this.paddle.cx) {
-					this.ball.speedX = -this.ballSpeedX;
-				}
-				if (this.ball.cx === this.paddle.cx) {
+			collisionedBallAndPaddle(direction) {
+				//パドルの中央と衝突した場合はX方向の速度成分を0とする
+				if (!direction.right && !direction.left) {
 					this.ball.speedX = 0;
 				}
-				if (this.ball.cx < this.paddle.cx) {
-					this.ball.speedX = this.ballSpeedX;
-				}
+				//衝突時のボールとパドルの距離に応じてX方向の速度を増減
+				this.ball.speedX = 0.2 * Math.abs(this.ball.cx - this.paddle.cx);
+				
+				//Y速度成分は常に反転
 				this.ball.speedY = -this.ball.speedY;
 			},
 			
@@ -306,14 +397,10 @@
 			 * @param Number index -衝突対象のブロックのインデックス
 			 * @param Object collisionDirection 衝突方向を管理するオブジェクト
 			 */
-			collisionedBallAndBrick: function(index, collisionDirection) {
-				console.log(collisionDirection);
+			collisionedBallAndBrick(index, direction) {
 				//衝突方向それぞれがtrueとなった場合、方向に応じた速度成分を反転
-				if (collisionDirection.top || collisionDirection.bottom) {
+				if (direction.top || direction.bottom) {
 					this.ball.speedY = -this.ball.speedY;
-				}
-				if (collisionDirection.left || collisionDirection.right){
-					this.ball.speedX = -this.ball.speedX;
 				}
 				
 				//衝突したブロックは非表示に切り替える
@@ -325,8 +412,8 @@
 
 <style lang="scss">
 	#app {
-		width: 100%;
-		height: 100%;
+		width: inherit;
+		height: inherit;
 		
 		
 		&--screen {
@@ -335,6 +422,11 @@
 			
 			border: 1px solid #000;
 		}
+	}
+	
+	.message {
+		font-size: 150%;
+		font-weight: bold;
 	}
 	
 	.paddle--slider {
